@@ -13,7 +13,7 @@ contract StorageFactory {
         simpleStorageArray.push(simpleStorage);
     }
 
-    //After creating a simple storage contract, you can store a singleStorageNumber
+    //After creating a simple storage contract, you can store a singleStorageNumber based on the contract that is at that index
     function sfStore(uint256 _simpleStorageIndex, uint256 _simpleStorageNumber) public {
         //Address of the contract we would wanna contract
         //ABI - application binary interface explained a bit later
