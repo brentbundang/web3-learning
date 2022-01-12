@@ -26,7 +26,7 @@ function fund() public payable {
 //Reading from another contract 
 function getVersion() public view returns (uint256) {  
     //We have this contract that has the interface functions implemented, we just pass the address of a data feed in order. ETH-USD
-    AggregatorV3Interface priceFeed = AggregatorV3Interface(0x9326BFA02ADD2366b30bacB125260Af641031331); 
+    AggregatorV3Interface priceFeed = AggregatorV3Interface(0x8A753747A1Fa494EC906cE90E9f37563A8AF630e)); 
     return priceFeed.version();
 }
 
