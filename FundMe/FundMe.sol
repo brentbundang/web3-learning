@@ -17,6 +17,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 contract FundMe {
 
     mapping(address => uint256) public addressToAmountFunded;
+    address[] public funders;
     address public owner; 
 
     constructor(){
@@ -31,6 +32,7 @@ contract FundMe {
         require(getConversionRate(msg.value) >= minimumUSD, "You need to spend more ETH!"); //stop executing if not true, revert the transaction -- receommended
         
         addressToAmountFunded[msg.sender] += msg.value;
+        funders.push(msg.sender);
         //conversion rathers instead of eth -- find the eth -> usd conversion value   
     } 
 
@@ -63,9 +65,20 @@ contract FundMe {
         return ethAmountInUsd;
     }
 
-    function withdraw() public payable {
-        require(msg.sender == owner); //If the sender is the owner transfer the balence they have sent to this contract based on this contracts address
+    //Wherever your modifier is run this require statement then run the rest of the code  
+    modifier onlyOwner{
+         require(msg.sender == owner); 
+         _;
+    }
+    function withdraw() public onlyOwner payable {
+        //require(msg.sender == owner); //If the sender is the owner transfer the balence they have sent to this contract based on this contracts address
         payable(msg.sender).transfer(address(this).balance); //Have set the address as payable
+        for (uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++){
+            address funder = funders[funderIndex];
+            addressToAmountFunded[funder] = 0;
+        }
+        funders = new address[](0);
+
     }
 
 }
