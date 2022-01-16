@@ -11,7 +11,7 @@ contract SimpleStorage
    // int256 favoriteInt = -5;
    // address favoriteAddress = "";
    // bytes32 favoriteBytes = "cat";
-
+  
    struct People {
        uint256 favoriteNumber;
        string name;
