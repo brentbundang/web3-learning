@@ -1,16 +1,4 @@
-from solcx import compile_standard, install_solc
-import json
-from web3 import Web3
-import os
-from dotenv  import load_dotenv
-
-#Looks for the .env file and imports it into our script
-load_dotenv()
-
-with open("./SimpleStorage.sol", "r") as file:
-    simple_storage_file = file.read()
-
-install_solc("0.6.0")
+u
 
 compiled_sol = compile_standard(
     {
@@ -81,8 +69,7 @@ simple_storage = w3.eth.contract(address=tx_receipt.contractAddress, abi=abi)
 #Call -- > making the call and getting a return value (don't make a state change to the block chain) blue buttons in remix
 #Transact -- > make a state change (yellow buttons in remix)
 
-#Initial value of our favorite number 
-print(simple_storage.functions.retrieve().call())
+
 
 
 #A nonce can only be used once per each transaction
