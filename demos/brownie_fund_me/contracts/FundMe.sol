@@ -1,84 +1,83 @@
 // SPDX-License-Identifier: MIT
-// Rinkeby-netowrk
 
-pragma solidity >=0.6.6 <0.9.0;
+pragma solidity ^0.6.6;
 
-//interfaces - functions to implement, compile down to ABI
-//ABI applicaiton-binary-interfsace - tells solidity what functions can be called on another contract. you need this if you wanna call another contract
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-//import "@chainlink/contracts/src/v0.8/vendor/SafeMathChainlink.sol"; //doesn't allow for overflows, don't have to account for overflows starting Soliditiy 0.8
 
-//We want this contract to be payable
-//Whenever you make a transaction you can append a value 
-//msg.sender - represents the sender of the function call
-//msg.value - the value they sent
-//chainlink - decentralized data ie. crypto maket prices 
+// Get the latest ETH/USD price from chainlink price feed
+import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
+import "@chainlink/contracts/src/v0.6/vendor/SafeMathChainlink.sol";
 
 contract FundMe {
-
+	// safe math library check uint256 for integer overflows
+    using SafeMathChainlink for uint256;
+    
+    //mapping to store which address depositeded how much ETH
     mapping(address => uint256) public addressToAmountFunded;
+    // array of addresses who deposited
     address[] public funders;
-    address public owner; 
-
-    constructor(){
+    //address of the owner (who deployed the contract)
+    address public owner;
+    AggregatorV3Interface public priceFeed;
+     
+    
+    // the first person to deploy the contract is
+    // the owner
+    constructor(address _priceFeed) public {
+        priceFeed = AggregatorV3Interface(_priceFeed);
         owner = msg.sender;
-    }
 
-    //A function that will keep track of how much money is being sent 
-    // See if the value they sent us is greater too or less than 50 dollars 
+    }
+    
     function fund() public payable {
-        // 50
-        uint256 minimumUSD = 50 * 10 ** 18; //Represented in gwei
-        require(getConversionRate(msg.value) >= minimumUSD, "You need to spend more ETH!"); //stop executing if not true, revert the transaction -- receommended
-        
+    	// 18 digit number to be compared with donated amount 
+        uint256 minimumUSD = 50 * 10 ** 18;
+        //is the donated amount less than 50USD?
+        require(getConversionRate(msg.value) >= minimumUSD, "You need to spend more ETH!");
+        //if not, add to mapping and funders array
         addressToAmountFunded[msg.sender] += msg.value;
         funders.push(msg.sender);
-        //conversion rathers instead of eth -- find the eth -> usd conversion value   
-    } 
-
-    //Reading from another contract 
-    function getVersion() public view returns (uint256) {  
-        //We have this contract that has the interface functions implemented, we just pass the address of a data feed in order. ETH-USD
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(0x8A753747A1Fa494EC906cE90E9f37563A8AF630e); 
+    }
+    
+    //function to get the version of the chainlink pricefeed
+    function getVersion() public view returns (uint256){
         return priceFeed.version();
     }
-
-    //Returns 5 values
-    //Tuple is a list of objects of potentially different types whos number is a constant at compile time 
-    function getPrice() public view returns (uint256) {
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(0x8A753747A1Fa494EC906cE90E9f37563A8AF630e); 
-        /*((uint80 roundId,
-        int256 answer,
-        uint256 startedAt, 
-        uint256 updatedAt,
-        uint80 answeredInRound) = priceFeed.latestRoundData();*/
-        (,int256 answer,,,) = priceFeed.latestRoundData(); //Use commas to remove the warnings about unused local variables
-        // ETH/USD rate in 18 digit 
+    
+    function getPrice() public view returns(uint256){
+        (,int256 answer,,,) = priceFeed.latestRoundData();
+         // ETH/USD rate in 18 digit 
          return uint256(answer * 10000000000);
     }
-
-    //1000000000
+    
+    // 1000000000
     function getConversionRate(uint256 ethAmount) public view returns (uint256){
         uint256 ethPrice = getPrice();
         uint256 ethAmountInUsd = (ethPrice * ethAmount) / 1000000000000000000;
         // the actual ETH/USD conversation rate, after adjusting the extra 0s.
         return ethAmountInUsd;
     }
-
-    //Wherever your modifier is run this require statement then run the rest of the code  
-    modifier onlyOwner{
-         require(msg.sender == owner); 
-         _;
+    
+    //modifier: https://medium.com/coinmonks/solidity-tutorial-all-about-modifiers-a86cf81c14cb
+    modifier onlyOwner {
+    	//is the message sender owner of the contract?
+        require(msg.sender == owner);
+        
+        _;
     }
-    function withdraw() public onlyOwner payable {
-        //require(msg.sender == owner); //If the sender is the owner transfer the balence they have sent to this contract based on this contracts address
-        payable(msg.sender).transfer(address(this).balance); //Have set the address as payable
-        for (uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++){
+    
+    // onlyOwner modifer will first check the condition inside it 
+    // and 
+    // if true, withdraw function will be executed 
+    function withdraw() payable onlyOwner public {
+        msg.sender.transfer(address(this).balance);
+        
+        //iterate through all the mappings and make them 0
+        //since all the deposited amount has been withdrawn
+        for (uint256 funderIndex=0; funderIndex < funders.length; funderIndex++){
             address funder = funders[funderIndex];
             addressToAmountFunded[funder] = 0;
         }
+        //funders array will be initialized to 0
         funders = new address[](0);
-
     }
-
 }
