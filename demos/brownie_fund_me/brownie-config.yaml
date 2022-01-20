@@ -12,4 +12,6 @@ networks:
     verify: True
   development:
     verify: False
+  local-ganache:
+    verify: False
 
