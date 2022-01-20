@@ -14,7 +14,7 @@ def deploy_fund_me():
         price_feed_address = MockV3Aggregator[-1].address  
     
     #.get() will make our lives easier and we could run into index errors
-    fund_me = FundMe.deploy(price_feed_address,{'from':account}, publish_source=config["networks"][network.show_active()].get(["verify"]))
+    fund_me = FundMe.deploy(price_feed_address,{'from':account}, publish_source=config["networks"][network.show_active()].get("verify"))
     print(f"Contract deployed to {fund_me.address} ")
      
 def main():
