@@ -13,9 +13,12 @@ def deploy_fund_me():
         price_feed_address = MockV3Aggregator[-1].address  
     
     #.get() will make our lives easier and we could run into index errors
-    fund_me = FundMe.deploy(price_feed_address,{'from':account}, publish_source=config["networks"][network.show_active()].get("verify"))
+    #max fee how much you will pay in order to get it implmeented in the blockchain
+    #priorty fee is how much the miner will be rewarded for including it into the block
+    fund_me = FundMe.deploy(price_feed_address,{'from':account, 'max_fee':765625000, 'priority_fee':1}, publish_source=config["networks"][network.show_active()].get("verify"))
     print(f"Contract deployed to {fund_me.address} ")
     return fund_me
-     
+
+
 def main():
     deploy_fund_me()

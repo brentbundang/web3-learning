@@ -5,10 +5,11 @@ DECIMALS = 8
 # This is 2,000
 INITIAL_VALUE = 200000000000
 
+FORKED_LOCAL_ENVIRONMENTS = ["mainet-fork", "mainnet-fork-dev"]
 LOCAL_BLOCKCHAIN_ENVIRONMENTS = ["development", "local-ganache"]
 
 def get_account():
-    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS or network.show_active() in FORKED_LOCAL_ENVIRONMENTS:
        return accounts[0]
     else:
         return accounts.load("browniefundme-account")
