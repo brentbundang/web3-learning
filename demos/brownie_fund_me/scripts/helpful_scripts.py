@@ -1,11 +1,15 @@
 from brownie import accounts, network, MockV3Aggregator, config
 from web3 import Web3
 
-DECIMALS = 18
-STARTING_PRICE = 2000
+DECIMALS = 8
+# This is 2,000
+INITIAL_VALUE = 200000000000
+
+FORKED_LOCAL_ENVIRONMENTS = ["mainet-fork", "mainnet-fork-dev"]
+LOCAL_BLOCKCHAIN_ENVIRONMENTS = ["development", "local-ganache"]
 
 def get_account():
-    if network.show_active() == "development":
+    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS or network.show_active() in FORKED_LOCAL_ENVIRONMENTS:
        return accounts[0]
     else:
         return accounts.load("browniefundme-account")
@@ -13,8 +17,7 @@ def get_account():
 def deploy_mocks():
     print(f"The active network is {network.show_active()}")
     print("Deploying mocks...")
-    if len(MockV3Aggregator) <=0:
-        MockV3Aggregator.deploy(DECIMALS,Web3.toWei(STARTING_PRICE,"ether"),{'from':get_account()})
-        print ("mocks deployed!")
+    MockV3Aggregator.deploy(DECIMALS,INITIAL_VALUE,{'from':get_account()})
+    print ("mocks deployed!")
              
  
